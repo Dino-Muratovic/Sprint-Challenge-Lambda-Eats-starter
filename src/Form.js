@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import * as yup from 'yup'; // import all of the YUP
+import axios from 'axios';
+import { Route } from 'react-router-dom';
+import styled from 'styled-components';
+
 
 
 //Set up Schema
 //Set up what the user is required to input
 const formSchema = yup.object().shape({
     name: yup.string().required("Full name is required"),
-    size: yup.string().required("Please select your pizza size"),
+    size: yup.string(),
     toppings: yup.boolean().oneOf([true], "Please select your toppings"),
     instructions: yup.string()
 })
@@ -31,7 +35,7 @@ const Form = () => {
         instructions: ""
     })
     //Set State for the button
-    const [button, setButton] = useState([true]);
+    const [button, setButton] = useState(true);
     //Set state for our post request
     const [post, setPost] = useState([]);
 
@@ -81,22 +85,34 @@ const Form = () => {
 
     const formSubmit = event => {
         event.preventDefault();
-        // console.log(`event here`, event)
+        console.log(`event here`, event)
 
+        axios
+        .post('https://reqres.in/api/users', formState)
+
+        .then (res => {
+            setPost(res.data);
+            console.log("success", post)
+
+            setFormState({
+                name: "",
+                size: "",
+                toppings: "", 
+                instructions: ""
+            })
+        })
+
+        .catch(err => {
+            console.log(err.res);
+        }) 
        
     }
 
 
 
-
-
-
-
-
-
-
     return (
-        <form onSubmit={formSubmit}>
+        <form onSubmit={formSubmit}>    
+                       
 
             {/* Put your name in here */}
             <label htmlFor="name">Name<br/>
@@ -105,16 +121,16 @@ const Form = () => {
                 type="text"
                 name="name"
                 value={formState.name}// to be changed
-                onChange={inputChange}
-                
+                onChange={inputChange}                
                 />                       
              </label>
+             {console.log(`errors => `, errors)}
              <br/> 
 
 
             {/* Select your pizza size here */}
              <label htmlFor="size">Please select your size:<br/>
-                <select id="size" name="size">
+                <select id="size" name="size" onChange={inputChange}>
                     <option value="Small Pizza">Small Pizza: 8-10 inches with 6 slices.</option>
                     <option value="Medium Pizza">Medium Pizza: 12 inches with 8 slices.</option>
                     <option value="Large Pizza">Large Pizza: 14 inch with 10 slices.</option>
@@ -177,7 +193,6 @@ const Form = () => {
              {/* Special instructions here */}
              <label htmlFor="instructions">Special Instructions<br/>
                 <input
-                placeholder="Anything else you'd like to add?"
                 id="name"
                 type="text"
                 name="instructions"
@@ -188,10 +203,8 @@ const Form = () => {
              <br/> 
 
              {/* Add submit button here */}
-             <button>Submit order here</button>
-
-
-
+             <pre>{JSON.stringify(post, null, 2)}</pre>
+             <button disabled={button}>Submit Order</button>
 
         </form>
     )
