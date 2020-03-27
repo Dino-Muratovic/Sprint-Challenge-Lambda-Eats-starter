@@ -1,4 +1,4 @@
-import React, { useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import * as yup from 'yup'; // import all of the YUP
 
 
@@ -23,13 +23,69 @@ const Form = () => {
         toppings: "", 
         instructions: ""
     })
-
+    //Set state for errors
     const [errors, setErrors] = useState({
         name: "",
         size: "",
         toppings: "", 
         instructions: ""
     })
+    //Set State for the button
+    const [button, setButton] = useState([true]);
+    //Set state for our post request
+    const [post, setPost] = useState([]);
+
+
+
+    //useEffect here
+    useEffect (() => {
+        formSchema.isValid(formState)
+    .then (valid => {
+        setButton(!valid);
+    }) 
+    }, [formState]) // Dependancy array here
+
+    //validate Change
+    const validateChange = event => {
+        yup
+
+        .reach(formSchema, event.target.name)
+        .validate(event.target.name === "toppings" ? event.target.checked : event.target.value)
+        .then(valid => {
+            setErrors({
+                ...errors, [event.target.name]:""
+            });
+        }).catch (err => {
+            setErrors({
+                errors, [event.target.name]: err.errors
+            });
+        });
+    };
+
+    //input change here
+    const inputChange = event => {
+        event.persist();
+        // console.log(`event ===>`, event)
+
+        const newFormData = {
+            ...formState,
+            [event.target.name]:
+            event.target.type === "checkbox" ? event.target.checked : event.target.value            
+        };
+        validateChange(event);
+        setFormState(newFormData);
+
+    }
+
+    //FORM submit here
+
+    const formSubmit = event => {
+        event.preventDefault();
+        // console.log(`event here`, event)
+
+       
+    }
+
 
 
 
@@ -40,7 +96,7 @@ const Form = () => {
 
 
     return (
-        <form>
+        <form onSubmit={formSubmit}>
 
             {/* Put your name in here */}
             <label htmlFor="name">Name<br/>
@@ -48,7 +104,8 @@ const Form = () => {
                 id="name"
                 type="text"
                 name="name"
-                value="name" // to be changed
+                value={formState.name}// to be changed
+                onChange={inputChange}
                 
                 />                       
              </label>
@@ -58,10 +115,10 @@ const Form = () => {
             {/* Select your pizza size here */}
              <label htmlFor="size">Please select your size:<br/>
                 <select id="size" name="size">
-                    <option>Small Pizza: 8-10 inches with 6 slices.</option>
-                    <option>Medium Pizza: 12 inches with 8 slices.</option>
-                    <option>Large Pizza: 14 inch with 10 slices.</option>
-                    <option>Extra-large Pizza: 16-18 inch with 12 slices.</option>
+                    <option value="Small Pizza">Small Pizza: 8-10 inches with 6 slices.</option>
+                    <option value="Medium Pizza">Medium Pizza: 12 inches with 8 slices.</option>
+                    <option value="Large Pizza">Large Pizza: 14 inch with 10 slices.</option>
+                    <option value="Extra-large Pizza">Extra-large Pizza: 16-18 inch with 12 slices.</option>
                 </select>       
              </label>
              <br/> 
@@ -78,7 +135,8 @@ const Form = () => {
                 id="toppings"
                 type="checkbox"
                 name="toppings"
-                value="name" // to be changed                
+                value={formState.toppings}// to be changed   
+                onChange={inputChange}            
                 />                       
              </label>
              <br/>
@@ -88,7 +146,8 @@ const Form = () => {
                 id="toppings"
                 type="checkbox"
                 name="toppings"
-                value="name" // to be changed                
+                value={formState.toppings} // to be changed     
+                onChange={inputChange}           
                 />                       
              </label>
              <br/>
@@ -98,7 +157,8 @@ const Form = () => {
                 id="toppings"
                 type="checkbox"
                 name="toppings"
-                value="name" // to be changed                
+                value={formState.toppings}// to be changed  
+                onChange={inputChange}              
                 />                       
              </label>
              <br/>
@@ -108,7 +168,8 @@ const Form = () => {
                 id="toppings"
                 type="checkbox"
                 name="toppings"
-                value="name" // to be changed                
+                value={formState.toppings} // to be changed  
+                onChange={inputChange}              
                 />                       
              </label>
              <br/>
@@ -120,10 +181,15 @@ const Form = () => {
                 id="name"
                 type="text"
                 name="instructions"
-                value="instructions" // to be changed                
+                value={formState.instructions} // to be changed 
+                onChange={inputChange}               
                 />                       
              </label>
              <br/> 
+
+             {/* Add submit button here */}
+             <button>Submit order here</button>
+
 
 
 
