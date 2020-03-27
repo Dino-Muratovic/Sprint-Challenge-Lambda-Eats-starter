@@ -1,15 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import * as yup from 'yup'; // import all of the YUP
 import axios from 'axios';
-import { Route } from 'react-router-dom';
 import styled from 'styled-components';
+
+const FormContainer = styled.form`
+    border:1px solid red;
+    background-color:#F0F8FF;
+    width:80%;
+    margin:0 auto;
+    display:flex;
+    flex-direction:column;
+    align-items:center;  
+    border-radius:15px; 
+`;
+
+
 
 
 
 //Set up Schema
 //Set up what the user is required to input
 const formSchema = yup.object().shape({
-    name: yup.string().required("Full name is required"),
+    name: yup.string().required("Full name is required").min(2),
     size: yup.string(),
     toppings: yup.boolean().oneOf([true], "Please select your toppings"),
     instructions: yup.string()
@@ -40,9 +52,18 @@ const Form = () => {
     const [post, setPost] = useState([]);
 
 
+    /* Each time the form value state is updated, check to see if it is valid per our schema. 
+--For an example check if name is a string and make sure some value is entered because it's required.
+  This will allow us to enable/disable the submit button.*/
 
     //useEffect here
     useEffect (() => {
+        /* We pass the entire state into the entire schema, no need to use reach here. 
+    We want to make sure it is all valid before we allow a user to submit
+    isValid comes from Yup directly */  
+
+
+    //make sure that formState is following all the rules coming the formSchema
         formSchema.isValid(formState)
     .then (valid => {
         setButton(!valid);
@@ -51,9 +72,10 @@ const Form = () => {
 
     //validate Change
     const validateChange = event => {
+        // Reach will allow us to "reach" into the schema and test only one part.
         yup
 
-        .reach(formSchema, event.target.name)
+        .reach(formSchema, event.target.name) // .name come from inputs
         .validate(event.target.name === "toppings" ? event.target.checked : event.target.value)
         .then(valid => {
             setErrors({
@@ -68,6 +90,8 @@ const Form = () => {
 
     //input change here
     const inputChange = event => {
+        /* event.persist allows us to use the synthetic event in an async manner.
+    We need to be able to use it after the form validation */
         event.persist();
         // console.log(`event ===>`, event)
 
@@ -94,7 +118,7 @@ const Form = () => {
             setPost(res.data);
             console.log("success", post)
 
-            setFormState({
+            setFormState({  // this sets the state back to blanks when the form is submitted
                 name: "",
                 size: "",
                 toppings: "", 
@@ -111,7 +135,7 @@ const Form = () => {
 
 
     return (
-        <form onSubmit={formSubmit}>    
+        <FormContainer onSubmit={formSubmit}>    
                        
 
             {/* Put your name in here */}
@@ -206,7 +230,7 @@ const Form = () => {
              <pre>{JSON.stringify(post, null, 2)}</pre>
              <button disabled={button}>Submit Order</button>
 
-        </form>
+        </FormContainer>
     )
 
 }
